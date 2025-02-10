@@ -1,29 +1,15 @@
-import httpx
-from .exeptions import LLMException
 import asyncio
 from pinecone.grpc import PineconeGRPC as Pinecone
 from pinecone.grpc.index_grpc import GRPCIndex
 from openai import AsyncOpenAI
-from .config import settings as llm_settings
+from src.config import settings
 from datetime import datetime
 
-class LLMUtils:
-    @staticmethod
-    async def send_callback(callback_url: str, response: dict):
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(callback_url, json=response)
-                print(response)
-        except Exception as e:
-            raise LLMException.FailedCallbck(detail=str(e))
-        
-    
-
 class PineconeService:
-    def __init__(self, openai: AsyncOpenAI = llm_settings.openai, pinecone: Pinecone = llm_settings.pinecone, index: GRPCIndex = llm_settings.pinecone_index):
-        self.pinecone = pinecone
-        self.index = index
-        self.openai = openai
+    def __init__(self, openai_api_key: str = settings.openai_api_key, pinecone_api_key: str = settings.pinecone_api_key, index_name: str = settings.pinecone_index_name):
+        self.pinecone = Pinecone(api_key=pinecone_api_key)
+        self.index = self.pinecone.Index(name=index_name)
+        self.openai = AsyncOpenAI(api_key=openai_api_key)
     
     def get_index(self):
         return self.index

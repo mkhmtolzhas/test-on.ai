@@ -6,6 +6,9 @@ load_dotenv()
 class Settings(BaseSettings):
     database_url: str
     openai_api_key: str
+    pinecone_api_key: str
+    pinecone_index_name: str
+    host: str
     alembic_url: str = ""
 
 

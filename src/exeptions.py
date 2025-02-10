@@ -12,5 +12,9 @@ class GlobalException:
     class InternalServerError(HTTPException):
         def __init__(self, detail: str):
             super().__init__(status_code=500, detail=detail)
+
+    class TooManyRequests(HTTPException):
+        def __init__(self, detail: str):
+            super().__init__(status_code=429, detail=detail)
     
     
