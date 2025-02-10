@@ -42,3 +42,8 @@ class AppCreator:
 
 app_creator = AppCreator()
 app = app_creator.get_app()
+
+
+@router.get("/ping")
+async def ping():
+    return {"ping": "pong"}

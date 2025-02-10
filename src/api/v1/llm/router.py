@@ -1,6 +1,4 @@
 from fastapi import APIRouter
-from src.exeptions import GlobalException
-from .exeptions import LLMException
 from .schemas import LLMRequestSchema, LLMResponseSchema
 from .service import llm_service
 from .utils import LLMUtils

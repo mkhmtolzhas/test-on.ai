@@ -5,8 +5,4 @@ router = APIRouter(prefix="/api")
 
 router.include_router(v1_router)
 
-@router.get("/ping")
-async def ping():
-    return {"ping": "pong"}
-
 

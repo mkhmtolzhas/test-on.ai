@@ -3,10 +3,12 @@ from src.exeptions import GlobalException
 from .schemas import LLMRequestSchema, LLMResponseSchema
 from .exeptions import LLMException
 from src.config import settings
+from ..rag.service import PineconeService, pinecone_service
 
 class LLMService:
-    def __init__(self, openai_api_key: str = settings.openai_api_key):
+    def __init__(self, openai_api_key: str = settings.openai_api_key, pinecone_service: PineconeService = pinecone_service):
         self.client = AsyncOpenAI(api_key=openai_api_key)
+        self.pinecone = pinecone_service
 
     
     async def get_response(self, prompt: LLMRequestSchema) -> LLMResponseSchema:
@@ -15,13 +17,20 @@ class LLMService:
         
         if not prompt.callback_url:
             raise GlobalException.UnprocessableEntity(detail="callback_url is required")
+        
 
+        search_results = await self.pinecone.search_embeddings(prompt.message)
+        print(search_results)
+
+        context = "\n".join([r["metadata"]["message"] for r in search_results["matches"]])
+
+        
         try:
             response = await self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": prompt.message},
+                    {"role": "user", "content": f"Context: {context}\nUser prompt{prompt.message}"},
                 ],
             )
 
