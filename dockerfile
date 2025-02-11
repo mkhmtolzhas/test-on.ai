@@ -1,13 +1,11 @@
-FROM python:3.12-slim
+FROM python:3.11
 
 WORKDIR /app
 
-COPY requirements.txt requirements.txt
+COPY requirements.txt .
 
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN alembic upgrade head
-
-CMD gunicorn src.main:app --workers 8 --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:${PORT:-8080} 
+CMD alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 --reload
