@@ -3,7 +3,7 @@ from .service import MessageService
 from .schemas import MessageCreate, MessageInDB
 from src.database import SessionDep
 
-router = APIRouter('/message')
+router = APIRouter(prefix='/message')
 
 @router.post("/")
 async def create_message(message: MessageCreate, session: SessionDep = SessionDep()):

@@ -10,8 +10,8 @@ CreatedAt = Annotated[datetime, mapped_column(server_default=text("TIMEZONE(('ut
 
 
 class MessageModel(Base):
-    __tablename__ = "messages"
+    __tablename__ = "message"
 
-    id: idpk
-    text: str
-    created_at: CreatedAt
+    id: Mapped[idpk]
+    text: Mapped[str]
+    created_at: Mapped[CreatedAt]
