@@ -13,5 +13,5 @@ class MessageModel(Base):
     __tablename__ = "message"
 
     id: Mapped[idpk]
-    text: Mapped[str]
+    message: Mapped[str]
     created_at: Mapped[CreatedAt]

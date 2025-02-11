@@ -9,12 +9,12 @@ class MessageService:
     @staticmethod
     async def create_message(sesssion: AsyncSession, message: MessageCreate):
         try:
-            new_message = MessageModel(**message.dict())
+            new_message = MessageModel(**message.model_dump())
             sesssion.add(new_message)
             await sesssion.commit()
             await sesssion.refresh(new_message)
 
-            new_message = MessageInDB().model_validate(new_message, from_attributes=True).model_dump()
+            new_message = MessageInDB.model_validate(new_message, from_attributes=True).model_dump()
 
 
             return {
@@ -31,7 +31,7 @@ class MessageService:
             result = await session.execute(stmt)
             messages = result.scalars().all()
 
-            messages = MessageInDB().model_validate(messages, from_attributes=True).model_dump(many=True)
+            messages = [MessageInDB.model_validate(message, from_attributes=True).model_dump() for message in messages]
 
             return {
                 "message": "Messages retrieved successfully",
@@ -50,7 +50,7 @@ class MessageService:
             if not message:
                 raise GlobalException.NotFound(detail="Message not found")
 
-            message = MessageInDB().model_validate(message, from_attributes=True).model_dump()
+            message = MessageInDB.model_validate(message, from_attributes=True).model_dump()
 
             return {
                 "message": "Message retrieved successfully",
@@ -63,7 +63,7 @@ class MessageService:
     @staticmethod
     async def update_message(session: AsyncSession, message_id: int, message: MessageCreate):
         try:
-            updated_message = session.get(MessageModel, message_id)
+            updated_message = await session.get(MessageModel, message_id)
             if not updated_message:
                 raise GlobalException.NotFound(detail="Message not found")
             
@@ -73,7 +73,7 @@ class MessageService:
             await session.commit()
             await session.refresh(updated_message)
 
-            updated_message = MessageInDB().model_validate(updated_message, from_attributes=True).model_dump()
+            updated_message = MessageInDB.model_validate(updated_message, from_attributes=True).model_dump()
 
             return {
                 "message": "Message updated successfully",
@@ -86,11 +86,11 @@ class MessageService:
     @staticmethod
     async def delete_message(session: AsyncSession, message_id: int):
         try:
-            message = session.get(MessageModel, message_id)
+            message = await session.get(MessageModel, message_id)
             if not message:
                 raise GlobalException.NotFound(detail="Message not found")
 
-            session.delete(message)
+            await session.delete(message)
             await session.commit()
 
             return {

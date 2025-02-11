@@ -3,7 +3,7 @@ from .schemas import LLMRequestSchema, LLMResponseSchema
 from .service import llm_service
 from .utils import LLMUtils
 
-router = APIRouter(prefix="/llm")
+router = APIRouter(prefix="/llm", tags=["LLM"])
 
 @router.post("/get_response", response_model=LLMResponseSchema)
 async def get_response(body: LLMRequestSchema):
