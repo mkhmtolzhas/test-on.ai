@@ -43,7 +43,7 @@ class PineconeService:
         result = await asyncio.to_thread(
             self.index.query,
             vector=embedding,
-            top_k=10,
+            top_k=6,
             namespace="default",
             include_metadata=True
         )
