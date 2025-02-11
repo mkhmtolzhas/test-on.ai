@@ -7,7 +7,6 @@ from datetime import datetime
 
 idpk = Annotated[int, mapped_column(primary_key=True, index=True)]
 CreatedAt = Annotated[datetime, mapped_column(server_default=text("TIMEZONE(('utc'), now())"))]
-UpdatedAt = Annotated[datetime, mapped_column(server_default=text("TIMEZONE(('utc'), now())"), onupdate=datetime.utcnow)]
 
 
 class MessageModel(Base):
@@ -16,4 +15,3 @@ class MessageModel(Base):
     id: idpk
     text: str
     created_at: CreatedAt
-    updated_at: UpdatedAt
