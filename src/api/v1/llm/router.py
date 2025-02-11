@@ -9,7 +9,7 @@ router = APIRouter(prefix="/llm", tags=["LLM"])
 async def get_response(body: LLMRequestSchema):
 
     response = await llm_service.get_response(body)
-    # await LLMUtils.send_callback(body.callback_url, response.model_dump())
+    await LLMUtils.send_callback(body.callback_url, response.model_dump())
     await LLMUtils.send_to_message_service(body.message)
     return response
 
