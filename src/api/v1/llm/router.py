@@ -20,7 +20,7 @@ async def get_response(body: LLMRequestSchema):
         raise GlobalException.InternalServerError(detail="Failed to upsert embeddings")
 
     response = await llm_service.get_response(body, context)
-    # await LLMUtils.send_callback(body.callback_url, response.model_dump())
+    await LLMUtils.send_callback(body.callback_url, response.model_dump())
     return response
 
 
