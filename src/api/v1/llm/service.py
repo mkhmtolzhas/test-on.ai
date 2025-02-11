@@ -3,12 +3,12 @@ from src.exeptions import GlobalException
 from .schemas import LLMRequestSchema, LLMResponseSchema
 from .exeptions import LLMException
 from src.config import settings
-from ..rag.service import RAGService, rag_service
+from .utils import LLMUtils
 
 class LLMService:
-    def __init__(self, openai_api_key: str = settings.openai_api_key, rag_service: RAGService = rag_service):
+    def __init__(self, openai_api_key: str = settings.openai_api_key, host: str = settings.host):
         self.client = AsyncOpenAI(api_key=openai_api_key)
-        self.pinecone = rag_service
+        self.host = host
         self.system_message = """
 Ты — интеллектуальный ассистент, обученный помогать пользователю, отвечая на вопросы и предоставляя информацию на основе внешних данных.
 
@@ -40,12 +40,16 @@ class LLMService:
             raise GlobalException.UnprocessableEntity(detail="callback_url is required")
         
 
-        search_results = await self.pinecone.search_embeddings(prompt.message)
+        # search_results = await self.pinecone.search_embeddings(prompt.message)
+        context = await LLMUtils.get_context(prompt.message)
+        if context["status"] != 200:
+            raise GlobalException.InternalServerError(detail="Failed to retrieve context")
 
 
-        context = "\n".join([r["metadata"]["message"] for r in search_results["matches"]])
+        upsert = await LLMUtils.upsert_context(prompt.message)
+        if upsert["status"] != 200:
+            raise GlobalException.InternalServerError(detail="Failed to upsert embeddings")
 
-        await self.pinecone.upsert_embeddings(prompt.message)
 
 
         try:
@@ -53,7 +57,7 @@ class LLMService:
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": self.system_message},
-                    {"role": "user", "content": f": Context (Предыдущие сообщения пользователей):{context}\n\nТо что ввел пользователь прямо сейчас: {prompt.message}"},
+                    {"role": "user", "content": f": Context (Предыдущие сообщения пользователей):{context["data"]}\n\nТо что ввел пользователь прямо сейчас: {prompt.message}"},
                 ],
             )
 

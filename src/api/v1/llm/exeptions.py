@@ -12,3 +12,7 @@ class LLMException:
     class UnexpectedError(HTTPException):
         def __init__(self, detail: str = "Unexpected Error in LLM Service"):
             super().__init__(status_code=500, detail=detail)
+
+    class RateLimitError(HTTPException):
+        def __init__(self, detail: str = "Rate limit exceeded"):
+            super().__init__(status_code=429, detail=detail)
