@@ -32,24 +32,13 @@ class LLMService:
 """
 
     
-    async def get_response(self, prompt: LLMRequestSchema) -> LLMResponseSchema:
+    async def get_response(self, prompt: LLMRequestSchema, context: dict) -> LLMResponseSchema:
         if not prompt.message:
             raise GlobalException.UnprocessableEntity(detail="message is required")
         
         if not prompt.callback_url:
             raise GlobalException.UnprocessableEntity(detail="callback_url is required")
         
-
-        # search_results = await self.pinecone.search_embeddings(prompt.message)
-        context = await LLMUtils.get_context(prompt.message)
-        if context["status"] != 200:
-            raise GlobalException.InternalServerError(detail="Failed to retrieve context")
-
-
-        upsert = await LLMUtils.upsert_context(prompt.message)
-        if upsert["status"] != 200:
-            raise GlobalException.InternalServerError(detail="Failed to upsert embeddings")
-
 
 
         try:

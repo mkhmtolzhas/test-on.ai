@@ -2,16 +2,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .api.global_router import router
-from .database import database
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    print("Database connecting")
-    yield
-    print("Database disconnecting")
-    await database.close()
-
 
 class AppCreator:
     def __init__(self, allow_origins: list[str] = ["*"]):
@@ -19,7 +9,6 @@ class AppCreator:
             title="Test task",
             description="Test task",
             version="0.1.0",
-            lifespan=lifespan
         )
         self.setup_middlewares(allow_origins)
 
