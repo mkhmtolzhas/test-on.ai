@@ -5,8 +5,9 @@ from src.config import settings
 from datetime import datetime
 from .utils import RAGUtils
 from .exeptions import RAGException
+from src.exeptions import GlobalException
 
-class PineconeService:
+class RAGService:
     def __init__(self, openai_api_key: str = settings.openai_api_key, pinecone_api_key: str = settings.pinecone_api_key, index_name: str = settings.pinecone_index_name):
         self.pinecone = Pinecone(api_key=pinecone_api_key)
         self.index = self.pinecone.Index(name=index_name)
@@ -16,8 +17,11 @@ class PineconeService:
         return self.index
     
     async def get_embeddings(self, text: str):
-        response = await self.openai.embeddings.create(input=text, model="text-embedding-ada-002")
-        return response.data[0].embedding
+        try:
+            response = await self.openai.embeddings.create(input=text, model="text-embedding-ada-002")
+            return response.data[0].embedding
+        except Exception as e:
+            raise GlobalException.InternalServerError(detail=str(e))
     
     async def upsert_embeddings(self, text: str):
         try:
@@ -38,17 +42,32 @@ class PineconeService:
             raise RAGException.EmbeddingsUpsertError(detail=str(e))
     
     async def search_embeddings(self, text: str):
-        embedding = await self.get_embeddings(text)
+        try:
+            embedding = await self.get_embeddings(text)
 
-        result = await asyncio.to_thread(
-            self.index.query,
-            vector=embedding,
-            top_k=6,
-            namespace="default",
-            include_metadata=True
-        )
-        return result
+            result = await asyncio.to_thread(
+                self.index.query,
+                vector=embedding,
+                top_k=6,
+                namespace="default",
+                include_metadata=True
+            )
+
+            formatted_result = {
+                "messages": [
+                    {
+                        "id": r["id"],
+                        "score": r["score"],
+                        "metadata": r["metadata"]
+                    }
+                    for r in result["matches"]
+                ]
+            }
+
+            return formatted_result
+        except Exception as e:
+            raise GlobalException.NotFound(detail=str(e))
 
     
 
-pinecone_service = PineconeService()
+rag_service = RAGService()

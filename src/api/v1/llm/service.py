@@ -3,12 +3,12 @@ from src.exeptions import GlobalException
 from .schemas import LLMRequestSchema, LLMResponseSchema
 from .exeptions import LLMException
 from src.config import settings
-from ..rag.service import PineconeService, pinecone_service
+from ..rag.service import RAGService, rag_service
 
 class LLMService:
-    def __init__(self, openai_api_key: str = settings.openai_api_key, pinecone_service: PineconeService = pinecone_service):
+    def __init__(self, openai_api_key: str = settings.openai_api_key, rag_service: RAGService = rag_service):
         self.client = AsyncOpenAI(api_key=openai_api_key)
-        self.pinecone = pinecone_service
+        self.pinecone = rag_service
         self.system_message = """
 Ты — интеллектуальный ассистент, обученный помогать пользователю, отвечая на вопросы и предоставляя информацию на основе внешних данных.
 
